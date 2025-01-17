@@ -25,77 +25,58 @@ import rahulshettyacademy.PageObjectModel.checkoutPage;
 import rahulshettyacademy.PageObjectModel.confirmationPage;
 import rahulshettyacademy.TestComponents.BaseTest;
 
-public class StandAloneTest extends BaseTest
-{
-	String productname="IPHONE 13 PRO";
-	@Test(dataProvider="getData",groups= {"purchase"})
-	public void SatndAloneTest(String email,String password,String productname) throws IOException
-	{
-	
-		
-		
-		
-		
-		
-		//LandingPaga.java
-		//By creating the Object of the Class We are accessing the methods of that class
-		
-		Productcatalogue productcatalogue=landingPage.LoginApllication(email, password);
-		
-		
-		
-		//Productcatalogue.java
-		//whatever product list we have it going to store in the products
-		
-		//Productcatalogue productcatalogue=new Productcatalogue(driver);
-		
-		List<WebElement>products=productcatalogue.GetproductList();
-		
-		productcatalogue.addProductTocart(productname);
-		//goTocartPage() is in the Abstractcompnent.java class but thats a parent class and we are extend to child class
-		//with using child class object you can access the methods of parent class
-		
-		
-		CartPage cartpage=productcatalogue.goTocartPage();
-		
-		
-		
-		//cartPage.java
-		
-	//	CartPage cartpage=new CartPage(driver);
-		Boolean match=cartpage.VerifyProductDisplay(productname);
-		 Assert.assertTrue(match);
-		//validation should stay in the execution class it should not go in the POM class
-		 
-		 checkoutPage checkout= cartpage.goTocheckout();
-		 checkout.SelectCountry("india");
-		 
-		 confirmationPage confirmationmsg=checkout.submitOrder();
-		 
-		 String confirmMeaage=confirmationmsg.getConfiramtionMessage();
-		 Assert.assertTrue(confirmMeaage.equalsIgnoreCase("THANKYOU FOR THE ORDER."));
-	   
-		
-	}
-	
-	//Learning abouts dependecy attrubute of TESTNG-dependsOnMethods
-	@Test(dependsOnMethods= {"SatndAloneTest"})
-	public void OrderHistroyTest()
-	{
-		Productcatalogue productcatalogue=landingPage.LoginApllication("shweta24@gmail.com", "Love@academy24");
-		OrderPage Orderpage=productcatalogue.goToOrdersPage();
-		
-		Assert.assertTrue(Orderpage.VerifyOrderDisplay(productname));	
-	}
-	
-	@DataProvider
-	public Object[] [] getData()
-	{
-		return new Object[][]{{"shweta24@gmail.com","Love@academy24","IPHONE 13 PRO"},{"shweta25@gmail.com","Love@academy25","ADIDAS ORIGINAL"}};
-		
-		}
-		
-		
+import org.testng.Assert;
+import org.testng.annotations.DataProvider;
+import org.testng.annotations.Test;
+
+import java.io.IOException;
+import java.util.List;
+
+public class StandAloneTest extends BaseTest {
+    
+    String productname = "IPHONE 13 PRO"; // Common product name for both tests
+    
+    @Test(dataProvider = "getData", groups = {"purchase"})
+    public void StandAloneTest(String email, String password, String productname) throws IOException {
+        
+        // Login to the application
+        Productcatalogue productcatalogue = landingPage.LoginApplication(email, password);
+        
+        // Get the list of products and add the desired product to the cart
+        List<WebElement> products = productcatalogue.GetproductList();
+        productcatalogue.addProductToCart(productname);
+        
+        // Go to the cart and verify the product is displayed
+        CartPage cartPage = productcatalogue.goToCartPage();
+        Boolean match = cartPage.VerifyProductDisplay(productname);
+        Assert.assertTrue(match, "The product is not displayed in the cart!");
+        
+        // Proceed to checkout and confirm the order
+        checkoutPage checkout = cartPage.goToCheckout();
+        checkout.SelectCountry("India");
+        
+        confirmationPage confirmationMsg = checkout.submitOrder();
+        String confirmationMessage = confirmationMsg.getConfirmationMessage();
+        Assert.assertTrue(confirmationMessage.equalsIgnoreCase("THANK YOU FOR THE ORDER."),
+                "Order confirmation message does not match.");
+    }
+    
+    // OrderHistoryTest is dependent on the previous test (StandAloneTest)
+    @Test(dependsOnMethods = {"StandAloneTest"})
+    public void OrderHistoryTest() {
+        Productcatalogue productcatalogue = landingPage.LoginApplication("shweta24@gmail.com", "Love@academy24");
+        
+        // Go to the orders page and verify the order
+        OrderPage orderPage = productcatalogue.goToOrdersPage();
+        Assert.assertTrue(orderPage.VerifyOrderDisplay(productname), "The order is not displayed in the order history!");
+    }
+    
+    // DataProvider for test data
+    @DataProvider
+    public Object[][] getData() {
+        return new Object[][] {
+            {"shweta24@gmail.com", "Love@academy24", "IPHONE 13 PRO"},
+            {"shweta25@gmail.com", "Love@academy25", "qwerty"}
+        };
+    }
 }
-
-
